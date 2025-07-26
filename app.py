@@ -13,9 +13,56 @@ with open(data_file, "r") as f:
     student_data = json.load(f)
 
 students = list(student_data.keys())
-selected_student = st.selectbox("Select Student", students)
+st.markdown("## 🎓 PhD Progress Tracker")
 
-st.title(f"PhD Progress Tracker – {selected_student}")
+# --- Add New Student ---
+st.markdown("### ➕ Add New Student")
+with st.form("add_student_form"):
+    new_student_name = st.text_input("Enter new student name")
+    add_student_btn = st.form_submit_button("Add Student")
+
+if add_student_btn:
+    if new_student_name and new_student_name not in student_data:
+        rpr_data = {
+            f"rpr{i}": {
+                "date": (date(2025, 8, 1) + timedelta(days=180 * (i - 1))).isoformat(),
+                "completed": False
+            } for i in range(1, 7)
+        }
+        aps_data = {
+            f"aps{i}": {
+                "date": (date(2026, 1, 1) + timedelta(days=365 * (i - 1))).isoformat(),
+                "completed": False
+            } for i in range(1, 4)
+        }
+        student_data[new_student_name] = {
+            "milestones": {
+                "Topic Finalized": False,
+                "Proposal Submitted": False,
+                "Ethics Approval": False,
+                "Course Work Completed": False,
+                "Comprehensive Viva": False,
+                "Data Collection": False,
+                "Data Analysis": False,
+                "Pre-synopsis Submitted": False,
+                "Thesis Submitted": False,
+                "Viva Voce Completed": False
+            },
+            "remarks": "",
+            "rpr": rpr_data,
+            "aps": aps_data
+        }
+        with open(data_file, "w") as f:
+            json.dump(student_data, f, indent=2)
+        st.success(f"✅ New student '{new_student_name}' added. Please reload the app to see them in the list.")
+        st.stop()
+    else:
+        st.warning("⚠️ Invalid name or student already exists.")
+
+# --- Select Student ---
+students = list(student_data.keys())
+selected_student = st.selectbox("Select Student", students)
+st.title(f"🧑‍🎓 Student: {selected_student}")
 
 # --- Rename Student ---
 st.markdown("### ✏️ Rename Student")
@@ -34,6 +81,15 @@ if submit_rename:
         st.info("ℹ️ New name is the same as current.")
     else:
         st.warning("⚠️ Please enter a valid new name.")
+
+# --- Delete Student ---
+st.markdown("### 🗑️ Delete Student")
+if st.button(f"Delete {selected_student}"):
+    del student_data[selected_student]
+    with open(data_file, "w") as f:
+        json.dump(student_data, f, indent=2)
+    st.success(f"✅ Student '{selected_student}' deleted. Please reload the app.")
+    st.stop()
 
 # --- Milestones ---
 st.header("📋 Milestones")
