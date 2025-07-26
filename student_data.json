@@ -1,1 +1,31 @@
+{
+  "Student A": {
+    "milestones": {
+      "Topic Finalized": false,
+      "Proposal Submitted": false,
+      "Ethics Approval": false,
+      "Course Work Completed": false,
+      "Comprehensive Viva": false,
+      "Data Collection": false,
+      "Data Analysis": false,
+      "Pre-synopsis Submitted": false,
+      "Thesis Submitted": false,
+      "Viva Voce Completed": false
+    },
+    "remarks": "",
+    "rpr": {
+      "rpr1": {"date": "2025-08-01", "completed": false},
+      "rpr2": {"date": "2026-02-01", "completed": false},
+      "rpr3": {"date": "2026-08-01", "completed": false},
+      "rpr4": {"date": "2027-02-01", "completed": false},
+      "rpr5": {"date": "2027-08-01", "completed": false},
+      "rpr6": {"date": "2028-02-01", "completed": false}
+    },
+    "aps": {
+      "aps1": {"date": "2026-01-01", "completed": false},
+      "aps2": {"date": "2027-01-01", "completed": false},
+      "aps3": {"date": "2028-01-01", "completed": false}
+    }
+  }
+}
 
