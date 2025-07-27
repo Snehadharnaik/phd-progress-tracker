@@ -38,11 +38,33 @@ def login():
         elif username in student_data and student_data[username].get("password") == password:
             st.session_state.user = "student"
             st.session_state.username = username
+            if student_data[username].get("force_change", False):
+                st.session_state.force_change = True
         else:
             st.error("Invalid credentials")
 
 if "user" not in st.session_state:
     login()
+    st.stop()
+
+# ---------- Password Change Enforcement ----------
+if st.session_state.get("user") == "student" and st.session_state.get("force_change"):
+    st.warning("⚠️ Please change your password before proceeding.")
+    new_pw = st.text_input("New Password", type="password")
+    confirm_pw = st.text_input("Confirm New Password", type="password")
+    if st.button("Update Password"):
+        uname = st.session_state.username
+        if new_pw != confirm_pw:
+            st.error("Passwords do not match.")
+        elif len(new_pw) < 6:
+            st.error("Password must be at least 6 characters long.")
+        else:
+            student_data[uname]["password"] = new_pw
+            student_data[uname]["force_change"] = False
+            save_data(student_data)
+            st.success("Password updated successfully. Reloading dashboard...")
+            st.session_state.force_change = False
+            st.experimental_rerun()
     st.stop()
 
 # ---------- Logout Button and Settings ----------
@@ -83,15 +105,16 @@ def supervisor_dashboard():
             if student_id in student_data:
                 st.warning("Student already exists.")
             else:
-                student_data[student_id] = {"password": new_password, "rpr": {}, "aps": {}}
+                student_data[student_id] = {"password": new_password, "rpr": {}, "aps": {}, "force_change": True}
                 save_data(student_data)
-                st.success("Student created.")
+                st.success("Student created and must change password on first login.")
 
         elif action == "Reset Password":
             if student_id in student_data:
                 student_data[student_id]["password"] = new_password
+                student_data[student_id]["force_change"] = True
                 save_data(student_data)
-                st.success("Password reset.")
+                st.success("Password reset. Student must change password on next login.")
             else:
                 st.warning("Student does not exist.")
 
