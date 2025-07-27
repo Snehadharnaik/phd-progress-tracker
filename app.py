@@ -19,6 +19,11 @@ def save_data(data):
 
 student_data = load_data()
 
+# ---------- Safe rerun cleanup ----------
+if st.session_state.get("logout"):
+    st.session_state.clear()
+    st.stop()
+
 # ---------- Authentication ----------
 def login():
     st.title("🔐 PhD Progress Tracker Login")
@@ -45,13 +50,13 @@ if "user" not in st.session_state:
 if st.session_state.get("rerun"):
     st.session_state.rerun = False
     st.experimental_rerun()
+    st.stop()
 
 # ---------- Logout Button ----------
 st.sidebar.title("⚙️ Settings")
 if st.sidebar.button("🚪 Logout"):
-    st.session_state.clear()
-    st.session_state.rerun = True
-    st.stop()
+    st.session_state.logout = True
+    st.experimental_rerun()
 
 # ---------- Supervisor Dashboard ----------
 def supervisor_dashboard():
