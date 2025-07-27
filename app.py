@@ -22,7 +22,7 @@ student_data = load_data()
 # ---------- Safe logout cleanup ----------
 if st.session_state.get("logout"):
     st.session_state.clear()
-    st.stop()
+    st.experimental_rerun()
 
 # ---------- Authentication ----------
 def login():
@@ -71,7 +71,7 @@ if st.session_state.get("user") == "student" and st.session_state.get("force_cha
 st.sidebar.title("⚙️ Settings")
 if st.sidebar.button("🚪 Logout"):
     st.session_state.logout = True
-    st.stop()
+    st.experimental_rerun()
 
 # Student password change
 if st.session_state.user == "student":
