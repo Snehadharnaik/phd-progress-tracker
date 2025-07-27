@@ -26,7 +26,7 @@ def login():
     password = st.text_input("Password", type="password")
     login_btn = st.button("Login")
 
-    if login_btn:
+    if login_btn and username and password:
         if username == "amit" and password == "admin123":
             st.session_state.next_user = "supervisor"
             st.session_state.next_username = "Dr.Amit Dharnaik"
@@ -37,10 +37,8 @@ def login():
             st.error("Invalid credentials")
 
     if "next_user" in st.session_state:
-        st.session_state.user = st.session_state.next_user
-        st.session_state.username = st.session_state.next_username
-        del st.session_state["next_user"]
-        del st.session_state["next_username"]
+        st.session_state.user = st.session_state.pop("next_user")
+        st.session_state.username = st.session_state.pop("next_username")
         st.experimental_rerun()
 
 if "user" not in st.session_state:
