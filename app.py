@@ -44,6 +44,12 @@ if "user" not in st.session_state:
     login()
     st.stop()
 
+# ---------- Logout Button ----------
+st.sidebar.title("⚙️ Settings")
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.clear()
+    st.experimental_rerun()
+
 # ---------- Supervisor Dashboard ----------
 def supervisor_dashboard():
     st.title("🧑‍🏫 Supervisor Dashboard")
