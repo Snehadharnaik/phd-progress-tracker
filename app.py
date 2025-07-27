@@ -19,7 +19,7 @@ def save_data(data):
 
 student_data = load_data()
 
-# ---------- Safe rerun cleanup ----------
+# ---------- Safe logout cleanup ----------
 if st.session_state.get("logout"):
     st.session_state.clear()
     st.stop()
@@ -35,11 +35,9 @@ def login():
         if username == "amit" and password == "admin123":
             st.session_state.user = "supervisor"
             st.session_state.username = "Dr.Amit Dharnaik"
-            st.session_state.rerun = True
         elif username in student_data and student_data[username].get("password") == password:
             st.session_state.user = "student"
             st.session_state.username = username
-            st.session_state.rerun = True
         else:
             st.error("Invalid credentials")
 
@@ -47,16 +45,28 @@ if "user" not in st.session_state:
     login()
     st.stop()
 
-if st.session_state.get("rerun"):
-    st.session_state.rerun = False
-    st.experimental_rerun()
-    st.stop()
-
-# ---------- Logout Button ----------
+# ---------- Logout Button and Settings ----------
 st.sidebar.title("⚙️ Settings")
 if st.sidebar.button("🚪 Logout"):
     st.session_state.logout = True
-    st.experimental_rerun()
+    st.stop()
+
+# Student password change
+if st.session_state.user == "student":
+    with st.sidebar.expander("🔐 Change Password"):
+        current_pw = st.text_input("Current Password", type="password")
+        new_pw = st.text_input("New Password", type="password")
+        confirm_pw = st.text_input("Confirm New Password", type="password")
+        if st.button("Update Password"):
+            uname = st.session_state.username
+            if student_data[uname].get("password") != current_pw:
+                st.error("Current password is incorrect.")
+            elif new_pw != confirm_pw:
+                st.error("New passwords do not match.")
+            else:
+                student_data[uname]["password"] = new_pw
+                save_data(student_data)
+                st.success("Password updated successfully.")
 
 # ---------- Supervisor Dashboard ----------
 def supervisor_dashboard():
