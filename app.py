@@ -1,7 +1,7 @@
 import streamlit as st
 import json
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 # --- File and Data Setup ---
 data_file = "data/student_data.json"
@@ -15,81 +15,101 @@ with open(data_file, "r") as f:
 students = list(student_data.keys())
 st.markdown("## 🎓 PhD Progress Tracker")
 
-# --- Add New Student ---
-st.markdown("### ➕ Add New Student")
-with st.form("add_student_form"):
-    new_student_name = st.text_input("Enter new student name")
-    add_student_btn = st.form_submit_button("Add Student")
+# --- Login System ---
+st.markdown("## 🔐 Login")
+role = st.radio("Login as:", ["Supervisor", "Student"], horizontal=True)
 
-if add_student_btn:
-    if new_student_name and new_student_name not in student_data:
-        rpr_data = {
-            f"rpr{i}": {
-                "date": (date(2025, 8, 1) + timedelta(days=180 * (i - 1))).isoformat(),
-                "completed": False
-            } for i in range(1, 7)
-        }
-        aps_data = {
-            f"aps{i}": {
-                "date": (date(2026, 1, 1) + timedelta(days=365 * (i - 1))).isoformat(),
-                "completed": False
-            } for i in range(1, 4)
-        }
-        student_data[new_student_name] = {
-            "milestones": {
-                "Topic Finalized": False,
-                "Proposal Submitted": False,
-                "Ethics Approval": False,
-                "Course Work Completed": False,
-                "Comprehensive Viva": False,
-                "Data Collection": False,
-                "Data Analysis": False,
-                "Pre-synopsis Submitted": False,
-                "Thesis Submitted": False,
-                "Viva Voce Completed": False
-            },
-            "remarks": "",
-            "rpr": rpr_data,
-            "aps": aps_data
-        }
-        with open(data_file, "w") as f:
-            json.dump(student_data, f, indent=2)
-        st.success(f"✅ New student '{new_student_name}' added. Please reload the app to see them in the list.")
+if role == "Supervisor":
+    password = st.text_input("Enter Supervisor Password", type="password")
+    if password != "amit123":
+        st.warning("Enter valid password to continue.")
         st.stop()
     else:
-        st.warning("⚠️ Invalid name or student already exists.")
+        st.success("Welcome, Dr. Amit Dharnaik! ✅")
+        selected_student = st.selectbox("Select Student", students)
 
-# --- Select Student ---
-students = list(student_data.keys())
-selected_student = st.selectbox("Select Student", students)
-st.title(f"🧑‍🎓 Student: {selected_student}")
+elif role == "Student":
+    student_user = st.selectbox("Select your name", students)
+    selected_student = student_user
+    st.info(f"Hello {student_user}, you can view and update your status.")
+
+else:
+    st.warning("Please select a valid role.")
+    st.stop()
+
+# --- Add New Student ---
+if role == "Supervisor":
+    st.markdown("### ➕ Add New Student")
+    with st.form("add_student_form"):
+        new_student_name = st.text_input("Enter new student name")
+        add_student_btn = st.form_submit_button("Add Student")
+
+    if add_student_btn:
+        if new_student_name and new_student_name not in student_data:
+            rpr_data = {
+                f"rpr{i}": {
+                    "date": (date(2025, 8, 1) + timedelta(days=180 * (i - 1))).isoformat(),
+                    "completed": False
+                } for i in range(1, 7)
+            }
+            aps_data = {
+                f"aps{i}": {
+                    "date": (date(2026, 1, 1) + timedelta(days=365 * (i - 1))).isoformat(),
+                    "completed": False
+                } for i in range(1, 4)
+            }
+            student_data[new_student_name] = {
+                "milestones": {
+                    "Topic Finalized": False,
+                    "Proposal Submitted": False,
+                    "Ethics Approval": False,
+                    "Course Work Completed": False,
+                    "Comprehensive Viva": False,
+                    "Data Collection": False,
+                    "Data Analysis": False,
+                    "Pre-synopsis Submitted": False,
+                    "Thesis Submitted": False,
+                    "Viva Voce Completed": False
+                },
+                "remarks": "",
+                "rpr": rpr_data,
+                "aps": aps_data
+            }
+            with open(data_file, "w") as f:
+                json.dump(student_data, f, indent=2)
+            st.success(f"✅ New student '{new_student_name}' added. Please reload the app to see them in the list.")
+            st.stop()
+        else:
+            st.warning("⚠️ Invalid name or student already exists.")
 
 # --- Rename Student ---
-st.markdown("### ✏️ Rename Student")
-with st.form("rename_form"):
-    new_name = st.text_input("Enter new name for the selected student", value=selected_student)
-    submit_rename = st.form_submit_button("Rename Student")
+if role == "Supervisor":
+    st.markdown("### ✏️ Rename Student")
+    with st.form("rename_form"):
+        new_name = st.text_input("Enter new name for the selected student", value=selected_student)
+        submit_rename = st.form_submit_button("Rename Student")
 
-if submit_rename:
-    if new_name and new_name != selected_student:
-        student_data[new_name] = student_data.pop(selected_student)
-        with open(data_file, "w") as f:
-            json.dump(student_data, f, indent=2)
-        st.success(f"✅ Student renamed to {new_name}. Please reload the app.")
-        st.stop()
-    elif new_name == selected_student:
-        st.info("ℹ️ New name is the same as current.")
-    else:
-        st.warning("⚠️ Please enter a valid new name.")
+    if submit_rename:
+        if new_name and new_name != selected_student:
+            student_data[new_name] = student_data.pop(selected_student)
+            with open(data_file, "w") as f:
+                json.dump(student_data, f, indent=2)
+            st.success(f"✅ Student renamed to {new_name}. Please reload the app.")
+            st.stop()
+        elif new_name == selected_student:
+            st.info("ℹ️ New name is the same as current.")
+        else:
+            st.warning("⚠️ Please enter a valid new name.")
 
 # --- Delete Student ---
-st.markdown("### 🗑️ Delete Student")
-if st.button(f"Delete {selected_student}"):
-    del student_data[selected_student]
-    with open(data_file, "w") as f:
-        json.dump(student_data, f, indent=2)
-    st.success(f"✅ Student '{selected_student}' deleted. Please reload the app.")
-    st.stop()
+if role == "Supervisor":
+    st.markdown("### 🗑️ Delete Student")
+    if st.button(f"Delete {selected_student}"):
+        del student_data[selected_student]
+        with open(data_file, "w") as f:
+            json.dump(student_data, f, indent=2)
+        st.success(f"✅ Student '{selected_student}' deleted. Please reload the app.")
+        st.stop()
 
 # --- Milestones ---
 st.header("📋 Milestones")
@@ -109,6 +129,7 @@ st.progress(progress_count / len(milestones))
 st.subheader("📁 Upload Documents")
 uploaded_file = st.file_uploader("Upload files (PDF)", type=["pdf"])
 if uploaded_file:
+    os.makedirs("data/uploads", exist_ok=True)
     save_path = os.path.join("data/uploads", f"{selected_student}_{uploaded_file.name}")
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -145,11 +166,12 @@ for i in range(1, 4):
         st.warning(f"{key.upper()} due in {days_left} days")
 
 # --- Save Button ---
-if st.button("💾 Save All Progress"):
-    student_data[selected_student]["milestones"] = updated_milestones
-    student_data[selected_student]["remarks"] = remarks
-    student_data[selected_student]["rpr"] = rpr_data
-    student_data[selected_student]["aps"] = aps_data
-    with open(data_file, "w") as f:
-        json.dump(student_data, f, indent=2)
-    st.success("Progress saved successfully.")
+if role == "Supervisor" or role == "Student":
+    if st.button("💾 Save All Progress"):
+        student_data[selected_student]["milestones"] = updated_milestones
+        student_data[selected_student]["remarks"] = remarks
+        student_data[selected_student]["rpr"] = rpr_data
+        student_data[selected_student]["aps"] = aps_data
+        with open(data_file, "w") as f:
+            json.dump(student_data, f, indent=2)
+        st.success("Progress saved successfully.")
