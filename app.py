@@ -1,4 +1,16 @@
-...
+import streamlit as st
+import os
+import json
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load student data
+with open("data/student_data.json", "r") as f:
+    student_data = json.load(f)
+
+# Example session username (Replace this with your actual session login logic)
+selected_student = st.session_state.get("username", "student1")
+
 # --- File Upload ---
 st.subheader("📁 Upload Documents")
 uploaded_file = st.file_uploader("Upload files (PDF)", type=["pdf"])
@@ -21,9 +33,6 @@ if os.path.exists(student_folder):
         st.info("No files uploaded yet.")
 
 # --- Charts: RPR & APS Completion ---
-import matplotlib.pyplot as plt
-import numpy as np
-
 st.subheader("📊 Progress Charts")
 
 # RPR Chart
@@ -51,4 +60,3 @@ with col2:
     ax2.pie([aps_done, aps_total - aps_done], labels=["Completed", "Pending"], autopct='%1.1f%%', startangle=90, colors=["#2196F3", "#FF5722"])
     ax2.axis('equal')
     st.pyplot(fig2)
-...
