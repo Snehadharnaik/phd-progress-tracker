@@ -13,10 +13,13 @@ selected_student = st.session_state.get("username", "student1")
 
 # --- File Upload ---
 st.subheader("📁 Upload Documents")
+
+# ✅ Define student folder regardless of file upload
+student_folder = os.path.join("data/uploads", selected_student)
+os.makedirs(student_folder, exist_ok=True)
+
 uploaded_file = st.file_uploader("Upload files (PDF)", type=["pdf"])
 if uploaded_file:
-    student_folder = os.path.join("data/uploads", selected_student)
-    os.makedirs(student_folder, exist_ok=True)
     save_path = os.path.join(student_folder, uploaded_file.name)
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
