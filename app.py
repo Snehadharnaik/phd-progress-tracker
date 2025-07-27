@@ -28,17 +28,20 @@ def login():
 
     if login_btn:
         if username == "amit" and password == "admin123":
-            st.session_state.user = "supervisor"
-            st.session_state.username = "Dr.Amit Dharnaik"
-            st.success("Logged in as Supervisor")
-            st.experimental_rerun()
+            st.session_state.next_user = "supervisor"
+            st.session_state.next_username = "Dr.Amit Dharnaik"
         elif username in student_data and student_data[username].get("password") == password:
-            st.session_state.user = "student"
-            st.session_state.username = username
-            st.success(f"Logged in as {username}")
-            st.experimental_rerun()
+            st.session_state.next_user = "student"
+            st.session_state.next_username = username
         else:
             st.error("Invalid credentials")
+
+    if "next_user" in st.session_state:
+        st.session_state.user = st.session_state.next_user
+        st.session_state.username = st.session_state.next_username
+        del st.session_state["next_user"]
+        del st.session_state["next_username"]
+        st.experimental_rerun()
 
 if "user" not in st.session_state:
     login()
