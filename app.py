@@ -28,28 +28,30 @@ def login():
 
     if login_btn and username and password:
         if username == "amit" and password == "admin123":
-            st.session_state.next_user = "supervisor"
-            st.session_state.next_username = "Dr.Amit Dharnaik"
+            st.session_state.user = "supervisor"
+            st.session_state.username = "Dr.Amit Dharnaik"
+            st.session_state.rerun = True
         elif username in student_data and student_data[username].get("password") == password:
-            st.session_state.next_user = "student"
-            st.session_state.next_username = username
+            st.session_state.user = "student"
+            st.session_state.username = username
+            st.session_state.rerun = True
         else:
             st.error("Invalid credentials")
-
-    if "next_user" in st.session_state:
-        st.session_state.user = st.session_state.pop("next_user")
-        st.session_state.username = st.session_state.pop("next_username")
-        st.experimental_rerun()
 
 if "user" not in st.session_state:
     login()
     st.stop()
 
+if st.session_state.get("rerun"):
+    st.session_state.rerun = False
+    st.experimental_rerun()
+
 # ---------- Logout Button ----------
 st.sidebar.title("⚙️ Settings")
 if st.sidebar.button("🚪 Logout"):
     st.session_state.clear()
-    st.experimental_rerun()
+    st.session_state.rerun = True
+    st.stop()
 
 # ---------- Supervisor Dashboard ----------
 def supervisor_dashboard():
