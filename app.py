@@ -294,39 +294,57 @@ def show_student_progress(selected_student, editable=False):
     aps_total = len(aps_status)
 
     col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**RPR Completion**")
-        fig1, ax1 = plt.subplots()
-        # Fix NaN values
-if pd.isna(rpr_done):
-    rpr_done = 0
 
-if pd.isna(rpr_total):
-    rpr_total = 0
+with col1:
+    st.markdown("**RPR Completion**")
+    fig1, ax1 = plt.subplots()
 
-pending = rpr_total - rpr_done
+    # Fix values
+    rpr_done = rpr_done if rpr_done else 0
+    rpr_total = rpr_total if rpr_total else 0
+    pending = rpr_total - rpr_done
 
-# If no data available
-if rpr_total == 0:
-    ax1.text(0.5, 0.5, "No Data Available",
-             horizontalalignment='center',
-             verticalalignment='center')
-    ax1.axis('off')
-else:
-    ax1.pie([rpr_done, pending],
+    if rpr_total == 0:
+        ax1.text(0.5, 0.5, "No Data Available",
+                 horizontalalignment='center',
+                 verticalalignment='center')
+        ax1.axis('off')
+    else:
+        ax1.pie(
+            [rpr_done, pending],
             labels=["Completed", "Pending"],
             autopct='%1.1f%%',
             startangle=90,
-            colors=["#4CAF50", "#FFC107"])
+            colors=["#4CAF50", "#FFC107"]
+        )
         ax1.axis('equal')
-        st.pyplot(fig1)
 
-    with col2:
-        st.markdown("**APS Completion**")
-        fig2, ax2 = plt.subplots()
-        ax2.pie([aps_done, aps_total - aps_done], labels=["Completed", "Pending"], autopct='%1.1f%%', startangle=90, colors=["#2196F3", "#FF5722"])
+    st.pyplot(fig1)
+
+with col2:
+    st.markdown("**APS Completion**")
+    fig2, ax2 = plt.subplots()
+
+    aps_done = aps_done if aps_done else 0
+    aps_total = aps_total if aps_total else 0
+    pending_aps = aps_total - aps_done
+
+    if aps_total == 0:
+        ax2.text(0.5, 0.5, "No Data Available",
+                 horizontalalignment='center',
+                 verticalalignment='center')
+        ax2.axis('off')
+    else:
+        ax2.pie(
+            [aps_done, pending_aps],
+            labels=["Completed", "Pending"],
+            autopct='%1.1f%%',
+            startangle=90,
+            colors=["#2196F3", "#FF5722"]
+        )
         ax2.axis('equal')
-        st.pyplot(fig2)
+
+    st.pyplot(fig2)
 
 # ---------- Route to Appropriate Dashboard ----------
 if st.session_state.user == "supervisor":
