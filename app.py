@@ -64,14 +64,14 @@ if st.session_state.get("user") == "student" and st.session_state.get("force_cha
             save_data(student_data)
             st.success("Password updated successfully. Reloading dashboard...")
             st.session_state.force_change = False
-            st.experimental_rerun()
+            st.rerun()
     st.stop()
 
 # ---------- Logout Button and Settings ----------
 st.sidebar.title("⚙️ Settings")
 if st.sidebar.button("🚪 Logout"):
     st.session_state.logout = True
-    st.experimental_rerun()
+    st.rerun()
 
 # Student password change
 if st.session_state.user == "student":
