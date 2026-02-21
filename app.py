@@ -287,7 +287,7 @@ def show_student_progress(selected_student, editable=False):
             save_data(student_data)
             st.success("Progress updated.")
 
-      # Charts
+# Charts
     rpr_done = sum(1 for r in rpr_status if rpr_status[r].get("completed"))
     rpr_total = len(rpr_status)
     aps_done = sum(1 for a in aps_status if aps_status[a].get("completed"))
