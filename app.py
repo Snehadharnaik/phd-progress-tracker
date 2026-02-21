@@ -1,3 +1,6 @@
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 import streamlit as st
 import os
 import json
@@ -18,6 +21,87 @@ def save_data(data):
         json.dump(data, f, indent=4)
 
 student_data = load_data()
+
+# ---------------- Google Drive Backup (Service Account) ----------------
+SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+def get_drive_service():
+    sa_json = os.getenv("GDRIVE_SERVICE_ACCOUNT_JSON")
+    if not sa_json:
+        return None
+    try:
+        info = json.loads(sa_json)
+        creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
+        return build("drive", "v3", credentials=creds, cache_discovery=False)
+    except Exception:
+        return None
+
+def find_file_in_folder(service, filename: str, folder_id: str):
+    q = f"'{folder_id}' in parents and name='{filename}' and trashed=false"
+    res = service.files().list(q=q, fields="files(id,name)").execute()
+    files = res.get("files", [])
+    return files[0]["id"] if files else None
+
+def upload_or_update_file(service, local_path: str, drive_filename: str, folder_id: str):
+    media = MediaFileUpload(local_path, resumable=True)
+    existing_id = find_file_in_folder(service, drive_filename, folder_id)
+
+    if existing_id:
+        service.files().update(fileId=existing_id, media_body=media).execute()
+        return existing_id
+    else:
+        meta = {"name": drive_filename, "parents": [folder_id]}
+        created = service.files().create(body=meta, media_body=media, fields="id").execute()
+        return created["id"]
+
+def backup_json_to_drive(local_json_path: str, drive_filename: str = "student_data.json"):
+    folder_id = os.getenv("GDRIVE_FOLDER_ID")
+    service = get_drive_service()
+    if not folder_id or service is None:
+        return False
+    if not os.path.exists(local_json_path):
+        return False
+    try:
+        upload_or_update_file(service, local_json_path, drive_filename, folder_id)
+        return True
+    except Exception:
+        return False
+
+def backup_pdf_to_drive(local_pdf_path: str, student_name: str):
+    """
+    Upload PDFs into a subfolder inside your main backup folder.
+    """
+    folder_id = os.getenv("GDRIVE_FOLDER_ID")
+    service = get_drive_service()
+    if not folder_id or service is None:
+        return False
+
+    try:
+        # Find or create student folder inside main folder
+        q = (
+            f"'{folder_id}' in parents and "
+            f"name='{student_name}' and "
+            "mimeType='application/vnd.google-apps.folder' and trashed=false"
+        )
+        res = service.files().list(q=q, fields="files(id,name)").execute()
+        files = res.get("files", [])
+
+        if files:
+            student_folder_id = files[0]["id"]
+        else:
+            meta = {
+                "name": student_name,
+                "mimeType": "application/vnd.google-apps.folder",
+                "parents": [folder_id],
+            }
+            created = service.files().create(body=meta, fields="id").execute()
+            student_folder_id = created["id"]
+
+        pdf_name = os.path.basename(local_pdf_path)
+        upload_or_update_file(service, local_pdf_path, pdf_name, student_folder_id)
+        return True
+    except Exception:
+        return False
 
 # ---------- Safe logout cleanup ----------
 if st.session_state.get("logout"):
