@@ -22,7 +22,7 @@ student_data = load_data()
 # ---------- Safe logout cleanup ----------
 if st.session_state.get("logout"):
     st.session_state.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # ---------- Authentication ----------
 def login():
