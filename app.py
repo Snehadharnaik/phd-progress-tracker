@@ -17,8 +17,12 @@ def load_data():
         return json.load(f)
 
 def save_data(data):
+    # Save locally first
     with open(STUDENT_DATA_PATH, "w") as f:
         json.dump(data, f, indent=4)
+
+    # Then backup to Google Drive
+    backup_json_to_drive(STUDENT_DATA_PATH, drive_filename="student_data.json")
 
 student_data = load_data()
 
