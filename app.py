@@ -297,7 +297,27 @@ def show_student_progress(selected_student, editable=False):
     with col1:
         st.markdown("**RPR Completion**")
         fig1, ax1 = plt.subplots()
-        ax1.pie([rpr_done, rpr_total - rpr_done], labels=["Completed", "Pending"], autopct='%1.1f%%', startangle=90, colors=["#4CAF50", "#FFC107"])
+        # Fix NaN values
+if pd.isna(rpr_done):
+    rpr_done = 0
+
+if pd.isna(rpr_total):
+    rpr_total = 0
+
+pending = rpr_total - rpr_done
+
+# If no data available
+if rpr_total == 0:
+    ax1.text(0.5, 0.5, "No Data Available",
+             horizontalalignment='center',
+             verticalalignment='center')
+    ax1.axis('off')
+else:
+    ax1.pie([rpr_done, pending],
+            labels=["Completed", "Pending"],
+            autopct='%1.1f%%',
+            startangle=90,
+            colors=["#4CAF50", "#FFC107"])
         ax1.axis('equal')
         st.pyplot(fig1)
 
